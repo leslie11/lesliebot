@@ -9,6 +9,7 @@ import cxkd
 import urllib
 import json
 import photo
+import requests
 from lxml import etree
 
 class WeixinInterface:
@@ -47,23 +48,43 @@ class WeixinInterface:
         toUser = xml.find("ToUserName").text
         if msgType == 'text':
             content = xml.find("Content").text
-            if content[0:1] == u"喂":
+            if content[0:4] == u"力力密码":
+
+                reply_content = '''xxx'''
+                return self.render.reply_text(fromUser, toUser, int(time.time()), reply_content)
+            if content[0:4] == u"妈妈密码":
+
+                reply_content = '''xxx'''
+                return self.render.reply_text(fromUser, toUser, int(time.time()), reply_content)
+
+            if content[0:2] == u"汇率":
+                url_dic = {}
+                try:
+                    for w in ['HKD', 'USD', 'EUR', 'JPY']:
+                        r = requests.get("https://api.fixer.io/latest?base=CNY")
+                        url_dic[w] = round(100 / r.json()['rates'][w], 3)
+                    res = u'''100港币兑换{}人民币
+100美元兑换{}人民币
+100欧元兑换{}人民币
+100日元兑换{}人民币'''.format(url_dic['HKD'], url_dic['USD'], url_dic['EUR'], url_dic['JPY'])
+                    return self.render.reply_text(fromUser, toUser, int(time.time()), res)
+                except Exception, e:
+
+                    return self.render.reply_text(fromUser, toUser, int(time.time()), str(e))
+            if content[0:2] == u"快递":
+                post = str(content[2:])
+                kuaidi = cxkd.detect_com(post)
+                return self.render.reply_text(fromUser, toUser, int(time.time()), kuaidi)
+            else:
                 key = 'd6f7efeccc3e43338b0517971bc0833d'  ###图灵机器人的key
                 api = 'http://www.tuling123.com/openapi/api?key=' + key + '&info='
-                info = content[1:].encode('UTF-8')
+                info = content[0:].encode('UTF-8')
                 url = api + info
                 page = urllib.urlopen(url)
                 html = page.read()
                 dic_json = json.loads(html)
                 reply_content = dic_json['text']
                 return self.render.reply_text(fromUser, toUser, int(time.time()), reply_content)
-
-            if content[0:2] == u"快递":
-                post = str(content[2:])
-                kuaidi = cxkd.detect_com(post)
-                return self.render.reply_text(fromUser, toUser, int(time.time()), kuaidi)
-            else:
-                return self.render.reply_text(fromUser, toUser, int(time.time()), content)
         elif msgType == 'image':
             try:
                 picurl = xml.find('PicUrl').text

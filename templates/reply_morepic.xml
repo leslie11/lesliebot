@@ -1,0 +1,18 @@
+$def with (toUser,fromUser,dyxx,num)
+    <xml>
+    <ToUserName><![CDATA[$toUser]]></ToUserName>
+    <FromUserName><![CDATA[$fromUser]]></FromUserName>
+    <CreateTime>12345678</CreateTime>
+    <MsgType><![CDATA[news]]></MsgType>
+    <ArticleCount>$num</ArticleCount>
+    <Articles>
+	$for m in range(num):
+        <item>
+            <Title>$dyxx[m][2]
+        (豆瓣:$dyxx[m][3] 票房：$dyxx[m][4]亿)</Title>
+        <Description><![CDATA[$dyxx[m][2]]]></Description>
+        <PicUrl><![CDATA[$dyxx[m][1]]]></PicUrl>
+        <Url><![CDATA[$dyxx[m][0]]]></Url>
+        </item>
+    </Articles>
+    </xml>
